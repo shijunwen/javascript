@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Loging</title>
+	<link rel="stylesheet" type="text/css" href="index.css">
+	<script type="text/javascript">
+		var obj={
+			name:'lisi',
+			wifi:{
+				name:'lis',
+				age:22
+			},
+			arr:[1,2,3,3]
+			
+		}
+		var obj1={};
+		//深度克隆
+		function deepClone(origin,target){
+			var target=target||{};
+			//toString
+			var toStr=Object.prototype.toString;
+			var arrStr="[object Array]";
+			//遍历原型属性
+			for(var prop in origin){
+				if(origin.hasOwnProperty(prop)){
+					if(typeof(origin[prop])=="Object"){
+						if(toStr.call(origin)==arrStr){
+							target[prop]=origin[prop];
+						}
+						//递归
+						deepClone(origin[prop],target[prop]);
+
+					}else{
+						target[prop]=origin[prop];
+					}
+				}
+			}
+		}
+
+		
+		
+
+	</script>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="logo">loading</div>
+		<div class="dots"></div>
+		
+
+
+
+
+
+		</div>
+
+	</div>
+
+</body>
+</html>
