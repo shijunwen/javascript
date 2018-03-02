@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bfmzdx.projectDelivery.dao.contractmanager.ContractMapper">
+  <resultMap id="BaseResultMap" type="com.bfmzdx.projectDelivery.entity.Contract">
+    <id column="contract_id" jdbcType="INTEGER" property="contractId" />
+    <result column="contract_code" jdbcType="VARCHAR" property="contractCode" />
+    <result column="contract_name" jdbcType="VARCHAR" property="contractName" />
+    <result column="project_company_name" jdbcType="VARCHAR" property="projectCompanyName" />
+    <result column="contract_money" jdbcType="DOUBLE" property="contractMoney" />
+    <result column="contract_type" jdbcType="VARCHAR" property="contractType" />
+    <result column="contract_stage" jdbcType="VARCHAR" property="contractStage" />
+    <result column="contract_wdate" jdbcType="VARCHAR" property="contractWdate" />
+    <result column="contract_edate" jdbcType="VARCHAR" property="contractEdate" />
+    <result column="contract_sdate" jdbcType="VARCHAR" property="contractSdate" />
+    <result column="contract_part_a" jdbcType="VARCHAR" property="contractPartA" />
+    <result column="companys_id" jdbcType="INTEGER" property="companysId" />
+    <result column="customer_id" jdbcType="INTEGER" property="customerId" />
+    <result column="contract_create_time" jdbcType="VARCHAR" property="contractCreateTime" />
+    <result column="contract_edit_time" jdbcType="VARCHAR" property="contractEditTime" />
+    <result column="contract_is_del" jdbcType="INTEGER" property="contractIsDel" />
+    <association property="consumer" javaType="com.bfmzdx.projectDelivery.entity.Consumer">
+    	<id column="consumer_id" property="consumerId"/>
+    	<result column="consumer_name" property="consumerName"/>
+    </association>
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    contract_id, contract_code, contract_name, project_company_name, contract_money, 
+    contract_type, contract_stage, contract_wdate, contract_edate, contract_sdate, contract_part_a, 
+    companys_id, customer_id, contract_create_time, contract_edit_time, contract_is_del
+  </sql>
+  
+  <select id="countContract" resultType="java.lang.Integer">
+  	select count(*) from contract_table where contract_code = #{value} or contract_name = #{value}
+  </select>
+  
+  
+  <select id="selectListProject" resultMap="BaseResultMap">
+		select consumer_name,consumer_id,
+		<include refid="Base_Column_List" />
+		from contract_table , consumer_table 
+		where contract_is_del = 1 and project_company_name = '项目' 
+			and contract_table.customer_id = consumer_table.consumer_id
+			and (contract_code like concat('%',#{codeOrname},'%') or contract_name like concat('%',#{codeOrname},'%'))
+			and (contract_stage like concat('%',#{contractStatus},'%') )
+  </select>
+  
+  <select id="selectListCompany" resultMap="BaseResultMap">
+		select company_name,company_id,
+		<include refid="Base_Column_List" />
+		from contract_table ,company_table
+		where contract_is_del = 1 and project_company_name = '外协'
+		and contract_table.companys_id = company_table.company_id
+		and (contract_code like concat('%',#{codeOrname},'%') or contract_name like concat('%',#{codeOrname},'%'))
+		and (contract_stage like concat('%',#{contractStatus},'%') )
+  </select>
+	
+  <select id="selectById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from contract_table
+    where contract_id = #{contractId,jdbcType=INTEGER} and contract_is_del = 1
+    and project_company_name = '项目'
+  </select>
+  
+  <select id="selectByIdCompany" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from contract_table
+    where contract_id = #{contractId,jdbcType=INTEGER} and contract_is_del = 1 
+    and project_company_name = '外协'
+  </select>
+ 
+  <delete id="deleteBycontractId" parameterType="java.lang.Integer">
+  	update contract_table set contract_is_del=#{1} where contract_id=#{0} and project_company_name = '项目'
+  </delete>
+  
+   <delete id="deleteBycompanysId" parameterType="java.lang.Integer">
+  	update contract_table set contract_is_del=#{1} where contract_id=#{0} and project_company_name = '外协'
+  </delete>
+  
+  <delete id="deleteBatch" parameterType="java.lang.Integer">
+   update contract_table
+		set contract_is_del = 0 where contract_id in
+		<foreach item="item" collection="del_ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach> 
+		
+		and project_company_name = '项目'
+  </delete> 
+  
+  
+  <delete id="deleteBatchCompany" parameterType="java.lang.Integer">
+   update contract_table
+		set contract_is_del = 0 where contract_id in
+		<foreach item="item" collection="del_ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach> 
+		
+		and project_company_name = '外协'
+  </delete>
+  
+  <insert id="insert" parameterType="com.bfmzdx.projectDelivery.entity.Contract">
+    insert into contract_table
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="contractCode != null">
+        contract_code,
+      </if>
+      <if test="contractName != null">
+        contract_name,
+      </if>
+      <if test="projectCompanyName != null">
+        project_company_name,
+      </if>
+      <if test="contractMoney != null">
+        contract_money,
+      </if>
+      <if test="contractType != null">
+        contract_type,
+      </if>
+      <if test="contractStage != null">
+        contract_stage,
+      </if>
+      <if test="contractWdate != null">
+        contract_wdate,
+      </if>
+      <if test="contractEdate != null">
+        contract_edate,
+      </if>
+      <if test="contractSdate != null">
+        contract_sdate,
+      </if>
+      <if test="contractPartA != null">
+        contract_part_a,
+      </if>
+      <if test="companysId != null">
+        companys_id,
+      </if>
+      <if test="customerId != null">
+        customer_id,
+      </if>
+      <if test="contractCreateTime != null">
+        contract_create_time,
+      </if>
+      <if test="contractEditTime != null">
+        contract_edit_time,
+      </if>
+      <if test="contractIsDel != null">
+        contract_is_del,
+      </if>
+    </trim>
+    <trim prefix="values(" suffix=")" suffixOverrides=",">
+      <if test="contractCode != null">
+        #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="contractName != null">
+        #{contractName,jdbcType=VARCHAR},
+      </if>
+      <if test="projectCompanyName != null">
+        #{projectCompanyName,jdbcType=VARCHAR},
+      </if>
+      <if test="contractMoney != null">
+        #{contractMoney,jdbcType=DOUBLE},
+      </if>
+      <if test="contractType != null">
+        #{contractType,jdbcType=VARCHAR},
+      </if>
+      <if test="contractStage != null">
+        #{contractStage,jdbcType=VARCHAR},
+      </if>
+      <if test="contractWdate != null">
+        #{contractWdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractEdate != null">
+        #{contractEdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSdate != null">
+        #{contractSdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractPartA != null">
+        #{contractPartA,jdbcType=VARCHAR},
+      </if>
+      <if test="companysId != null">
+        #{companysId,jdbcType=INTEGER},
+      </if>
+      <if test="customerId != null">
+        #{customerId,jdbcType=INTEGER},
+      </if>
+      <if test="contractCreateTime != null">
+        #{contractCreateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="contractEditTime != null">
+        #{contractEditTime,jdbcType=VARCHAR},
+      </if>
+      <if test="contractIsDel != null">
+        #{contractIsDel,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+    
+  <update id="update" parameterType="com.bfmzdx.projectDelivery.entity.Contract">
+    update contract_table
+    <set>
+      <if test="contractCode != null">
+        contract_code = #{contractCode,jdbcType=VARCHAR},
+      </if>
+      <if test="contractName != null">
+        contract_name = #{contractName,jdbcType=VARCHAR},
+      </if>
+      <if test="projectCompanyName != null">
+        project_company_name = #{projectCompanyName,jdbcType=VARCHAR},
+      </if>
+      <if test="contractMoney != null">
+        contract_money = #{contractMoney,jdbcType=DOUBLE},
+      </if>
+      <if test="contractType != null">
+        contract_type = #{contractType,jdbcType=VARCHAR},
+      </if>
+      <if test="contractStage != null">
+        contract_stage = #{contractStage,jdbcType=VARCHAR},
+      </if>
+      <if test="contractWdate != null">
+        contract_wdate = #{contractWdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractEdate != null">
+        contract_edate = #{contractEdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractSdate != null">
+        contract_sdate = #{contractSdate,jdbcType=VARCHAR},
+      </if>
+      <if test="contractPartA != null">
+        contract_part_a = #{contractPartA,jdbcType=VARCHAR},
+      </if>
+      <if test="companysId != null">
+        companys_id = #{companysId,jdbcType=INTEGER},
+      </if>
+      <if test="customerId != null">
+        customer_id = #{customerId,jdbcType=INTEGER},
+      </if>
+      <if test="contractCreateTime != null">
+        contract_create_time = #{contractCreateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="contractEditTime != null">
+        contract_edit_time = #{contractEditTime,jdbcType=VARCHAR},
+      </if>
+      <if test="contractIsDel != null">
+        contract_is_del = #{contractIsDel,jdbcType=INTEGER},
+      </if>
+    </set>
+    <where>
+    	contract_id = #{contractId,jdbcType=INTEGER}
+    </where> 
+  </update>
+  
+  </mapper>
